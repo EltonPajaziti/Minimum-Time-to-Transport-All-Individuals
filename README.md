@@ -1,4 +1,4 @@
-## Transportation Optimizer — Minimum Time to Transport All Individuals
+## Transportation Optimizer - Minimum Time to Transport All Individuals
 A **web-based optimization and visualization system** that solves the problem _“Minimum Time to Transport All Individuals”_ under **dynamic environmental conditions**.  
 Given `n` individuals with different crossing times, a vehicle with capacity `k`, and `m` environmental stages that multiply travel time, the system computes the **minimum total time** required to transport everyone from the left bank to the destination — or determines if the task is impossible.
 
