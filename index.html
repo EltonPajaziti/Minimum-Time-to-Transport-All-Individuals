@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transportation Optimizer</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/CSS/style.css">
+</head>
+<body>
+  <!-- HEADER (sticky, blur) -->
+  <header class="app-header glass">
+    <div class="app-header__inner">
+      <a class="brand" href="#">
+        <svg class="brand__logo" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M2 8c2.5 0 2.5 2 5 2s2.5-2 5-2 2.5 2 5 2 2.5-2 5-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M2 12c2.5 0 2.5 2 5 2s2.5-2 5-2 2.5 2 5 2 2.5-2 5-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="brand__text">
+          <span class="title">Transportation Optimizer</span>
+          <span class="subtitle">Minimize group transportation time with dynamic conditions</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- SELECT SCENARIO -->
+    <section class="section">
+      <h2 class="section__title">Select Scenario</h2>
+
+      <div class="scenario-grid">
+        <button class="scenario-card is-selected" data-scenario="flood">
+          <div class="scenario-card__icon" aria-hidden="true">
+            <img src="/Images/boat.png" alt="Boat" />
+          </div>
+          <div class="scenario-card__text">
+            <div class="scenario-card__title">Flood Rescue</div>
+            <div class="scenario-card__subtitle">Boat evacuating people across a flooded river</div>
+          </div>
+        </button>
+
+        <button class="scenario-card" data-scenario="emergency">
+          <div class="scenario-card__icon" aria-hidden="true">
+            <img src="/Images/firefighter.png" alt="Ambulance" />
+          </div>
+          <div class="scenario-card__text">
+            <div class="scenario-card__title">Fire Evacuation</div>
+            <div class="scenario-card__subtitle">Emergency evacuation from burning building</div>
+          </div>
+        </button>
+
+        <button class="scenario-card" data-scenario="mountain">
+          <div class="scenario-card__icon" aria-hidden="true">
+            <img src="/Images/helicopter.png" alt="Helicopter" />
+          </div>
+          <div class="scenario-card__text">
+            <div class="scenario-card__title">Mountain Rescue</div>
+            <div class="scenario-card__subtitle">Helicopter rescuing climbers from mountains</div>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- PROBLEM DESCRIPTION (compact, under scenarios) -->
+    <section class="section">
+      <div class="desc-card">
+        <h3 class="desc-title">Problem Description</h3>
+        <p class="desc-text">
+          We have <strong>n</strong> individuals and a single vehicle with capacity <strong>k</strong>. Each person has a base
+          crossing time, and the environment goes through <strong>m</strong> stages that multiply these times.
+          The optimizer searches for the sequence of forward and return trips that transports everyone in the
+          minimum possible total time (or returns <code>-1</code> if it is impossible).
+        </p>
+      </div>
+    </section>
+
+    <!-- PROBLEM PARAMETERS -->
+    <section class="section">
+      <h2 class="section__title">Problem Parameters</h2>
+
+      <form class="params" id="paramsForm">
+        <div class="params__row">
+          <div class="field">
+            <label for="n" class="label">Number of Individuals (n)</label>
+            <input id="n" type="number" class="input" placeholder="3" value="3" min="1" />
+          </div>
+
+          <div class="field">
+            <label for="k" class="label">Vehicle Capacity (k)</label>
+            <input id="k" type="number" class="input" placeholder="2" value="2" min="1" />
+          </div>
+        </div>
+
+        <div class="params__row">
+          <div class="field">
+            <label for="m" class="label">Number of Stages (m)</label>
+            <input id="m" type="number" class="input" placeholder="3" value="3" min="1" />
+          </div>
+
+          <div class="field">
+            <label for="times" class="label">Individual Times (comma-separated, n values)</label>
+            <input id="times" type="text" class="input" placeholder="2,5,8" value="2,5,8" />
+          </div>
+        </div>
+
+        <div class="params__row">
+          <div class="field field--full">
+            <label for="mult" class="label">Stage Multipliers (comma-separated, m values)</label>
+            <input id="mult" type="text" class="input" placeholder="1.0,1.5,0.75" value="1.0,1.5,0.75" />
+          </div>
+        </div>
+
+        <button type="button" id="solveBtn" class="cta">
+          <span class="cta__triangle" aria-hidden="true"></span>
+          <span>Solve & Visualize</span>
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <!-- VISUALIZATION (hidden initially) -->
+  <section id="vizSection" class="section hidden">
+    <h2 class="section__title">Visualization</h2>
+
+    <div id="viz" class="viz">
+      <svg id="riverViz" viewBox="0 0 960 320" preserveAspectRatio="xMidYMid meet"></svg>
+
+      <div class="viz-controls" id="vizControls">
+        <button id="btnPlay" class="btn" disabled>▶ Play</button>
+        <span class="stage-pill">Stage: <b id="stageIdx">0</b> · mul=<b id="stageMul">1.00</b></span>
+        <span class="clock">Time: <b id="clock">0.00</b> min</span>
+        <span id="resultSummary" class="result-pill hidden"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS (NEW) -->
+  <section id="resultsSection" class="section hidden">
+    <h2 class="section__title">Results</h2>
+    <div class="results-card">
+      <div id="resultsHeader" class="results-header">
+        <div class="results-status" id="resultsStatus">—</div>
+        <div class="results-time">
+          <span>Minimum Total Time</span>
+          <b id="resultsTime">—</b>
+        </div>
+      </div>
+
+      <div class="steps">
+        <h4 class="steps-title">Step Breakdown</h4>
+        <div id="stepsList" class="steps-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer__line"></div>
+    <p class="footer__text">
+      © 2025 <strong>Elton Pajaziti</strong> — Diploma Thesis Project · 
+      <span class="footer__highlight">Transportation Optimization Visualization</span>
+    </p>
+  </footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="/JS/algorithm.js"></script>
+  <script src="/JS/index.js"></script>
+</body>
+</html>
